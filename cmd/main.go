@@ -83,6 +83,7 @@ func Execute() {
 
 func init() {
 	initLoggers()
+
 	rootCmd.PersistentFlags().IntVar(&loggingLevel, "logging", 0, // Adding global ie. persistent logging level flag.
 		fmt.Sprintf("logging level [0...%d] (default 0)", MAX_LOGGING_LEVEL))
 
@@ -100,26 +101,45 @@ func init() {
 }
 
 func main() {
-	var cvcsString string
-	for i := 1; i <= (config.setsNum * 2); i++ {
-		cvc, err := getCVC()
-		if err != nil {
-			logError.Fatalln(err)
-		}
-		cvcsString += cvc
-	}
-	passString, err := swapUniqueRandom(cvcsString, config.upperNum, config.digitsNum)
+	cvcsString, err := getCVCsString(config.setsNum)
 	if err != nil {
 		logError.Fatalln(err)
 	}
-	chunks := SplitIntoChunks(passString, CHUNKSIZE)
-	password := strings.Join(chunks, "-")
+	if loggingLevel >= 2 {
+		logInfo.Printf("cvcsString = %s", cvcsString)
+	}
+	passString, err := swapUpperAndDigits(cvcsString, config.setsNum, config.upperNum, config.digitsNum)
+	if err != nil {
+		logError.Fatalln(err)
+	}
+	if loggingLevel >= 2 {
+		logInfo.Printf("passString = %s", passString)
+	}
+	chunks, err := SplitIntoChunks(passString, CHUNKSIZE)
+	if err != nil {
+		logError.Fatalln(err)
+	}
+	if loggingLevel >= 2 {
+		logInfo.Printf("chunks = %v", chunks)
+	}
+	password := strings.Join(chunks, config.separator)
 	fmt.Println(password)
 }
 
-// swapUniqueRandom replaces a given number of unique random characters
+func getCVCsString(setsNum int) (cvcsString string, err error) {
+	for i := 1; i <= (setsNum * 2); i++ { // times 2 for each chunk to be CVCCVC
+		cvc, err := getCVC()
+		if err != nil {
+			return "", err
+		}
+		cvcsString += cvc
+	}
+	return cvcsString, nil
+}
+
+// swapUpperAndDigits replaces a given number of unique random characters
 // in a string with their uppercase equivalents and digits.
-func swapUniqueRandom(s string, countUpper int, countDigits int) (string, error) {
+func swapUpperAndDigits(s string, setsNum int, countUpper int, countDigits int) (string, error) {
 	if countUpper == 0 {
 		return s, nil
 	}
@@ -129,8 +149,11 @@ func swapUniqueRandom(s string, countUpper int, countDigits int) (string, error)
 	n := len(runes)
 
 	// Validate input.
-	if countUpper < 0 || countUpper > n {
-		return "", fmt.Errorf("count must be between 0 and the length of the string")
+	if countUpper < 0 || countUpper > setsNum {
+		return "", fmt.Errorf("count of upper [%d] must be between 0 and the number of sets [%d]", countUpper, setsNum)
+	}
+	if countDigits < 0 || countDigits > setsNum {
+		return "", fmt.Errorf("count of digits [%d] must be between 0 and the number of sets [%d]", countDigits, setsNum)
 	}
 
 	// Use a map to keep track of the unique indices that have been chosen.
@@ -180,22 +203,20 @@ func swapUniqueRandom(s string, countUpper int, countDigits int) (string, error)
 }
 
 // SplitIntoChunks divides a string into chunks of a given size.
-func SplitIntoChunks(s string, chunkSize int) []string {
-	var chunks []string
+func SplitIntoChunks(s string, chunkSize int) (chunks []string, err error) {
+
 	if chunkSize <= 0 {
-		return chunks
+		return chunks, fmt.Errorf("size of a chunk must be greater than 0")
 	}
 
 	for i := 0; i < len(s); i += chunkSize {
-		end := i + chunkSize
-		if end > len(s) {
-			end = len(s)
-		}
+		end := min(i+chunkSize, len(s))
 		chunks = append(chunks, s[i:end])
 	}
-	return chunks
+	return chunks, nil
 }
 
+// getCVC returns random consonant-vowel-consonant string
 func getCVC() (cvc string, err error) {
 
 	var (
@@ -234,26 +255,4 @@ func initLoggers() {
 	logInfo = log.New(os.Stderr, hiCyan("╭info\n╰"), 0)
 	logWarning = log.New(os.Stderr, hiYellow("╭warning\n╰"), 0)
 	logError = log.New(os.Stderr, hiRed("╭error\n╰"), 0)
-}
-
-/*
-checkLogginglevel confirms if logging level does not exceed maximum level.
-
-	loggingLevel = 1 : often
-	loggingLevel = 2 : average
-	loggingLevel = 3 : seldom
-
-For convenience it also emits some log if loggingLevel >= 1.
-
-	'thisArgs' Values emitted to log.
-*/
-func checkLogginglevel(thisArgs []string) {
-	if loggingLevel > MAX_LOGGING_LEVEL {
-		logError.Fatalln(fmt.Errorf("%s", rootCmd.Flag("logging").Usage))
-	}
-
-	if loggingLevel >= 1 { // Show info.
-		logInfo.Printf("len(args): %d. args: %#v\n", len(thisArgs), thisArgs)
-		logInfo.Printf("loggingLevel: %d\n", loggingLevel)
-	}
 }
