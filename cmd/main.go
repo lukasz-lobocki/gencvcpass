@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"crypto/rand"
+	crand "crypto/rand"
 	"fmt"
 	"log"
 	"math/big"
+	mrand "math/rand"
 	"os"
 	"strings"
 	"unicode"
@@ -101,6 +102,10 @@ func init() {
 }
 
 func main() {
+	// Validate input.
+	if config.setsNum < 1 {
+		logError.Fatalf("count of sets=%d must be equal or greater than 1", config.setsNum)
+	}
 	cvcsString, err := getCVCsString(config.setsNum)
 	if err != nil {
 		logError.Fatalln(err)
@@ -126,6 +131,13 @@ func main() {
 	fmt.Println(password)
 }
 
+func getRandomSlice(s []int, n int) (seq []int) {
+	mrand.Shuffle(len(s), func(i, j int) {
+		s[i], s[j] = s[j], s[i]
+	})
+	return s[:n]
+}
+
 func getCVCsString(setsNum int) (cvcsString string, err error) {
 	for i := 1; i <= (setsNum * 2); i++ { // times 2 for each chunk to be CVCCVC
 		cvc, err := getCVC()
@@ -140,65 +152,41 @@ func getCVCsString(setsNum int) (cvcsString string, err error) {
 // swapUpperAndDigits replaces a given number of unique random characters
 // in a string with their uppercase equivalents and digits.
 func swapUpperAndDigits(s string, setsNum int, countUpper int, countDigits int) (string, error) {
-	if countUpper == 0 {
-		return s, nil
-	}
-
-	// Convert the string to a slice of runes to handle Unicode characters correctly.
-	runes := []rune(s)
-	n := len(runes)
-
 	// Validate input.
-	if countUpper < 0 || countUpper > setsNum {
-		return "", fmt.Errorf("count of upper [%d] must be between 0 and the number of sets [%d]", countUpper, setsNum)
+	if countUpper < 0 || countUpper > setsNum*2 {
+		return "", fmt.Errorf("count of upper=%d must be between 0 and number of sets=%d*2", countUpper, setsNum)
 	}
-	if countDigits < 0 || countDigits > setsNum {
-		return "", fmt.Errorf("count of digits [%d] must be between 0 and the number of sets [%d]", countDigits, setsNum)
-	}
-
-	// Use a map to keep track of the unique indices that have been chosen.
-	chosenIndices := make(map[int]bool)
-
-	// Loop until we have selected the required number of unique UPPER indices.
-	for len(chosenIndices) < countUpper {
-		// Generate a cryptographically secure random number between 0 and n-1.
-		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(n)))
-		if err != nil {
-			return "", err
-		}
-
-		idx := int(randomIndex.Int64())
-
-		// If the index has not been chosen yet, add it to the map.
-		if !chosenIndices[idx] {
-			chosenIndices[idx] = true
-			runes[idx] = unicode.ToUpper(runes[idx])
-		}
+	if countDigits < 0 || countDigits > setsNum*2 {
+		return "", fmt.Errorf("count of digits=%d must be between 0 and number of sets=%d*2", countDigits, setsNum)
 	}
 
-	// Loop until we have selected the required number of unique DIGITS indices, taking into account count consumed by upper
-	for len(chosenIndices)-countUpper < countDigits {
-		// Generate a cryptographically secure random number between 0 and n-1.
-		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(n)))
-		if err != nil {
-			return "", err
-		}
+	upper := func(x int) int {
+		return 6*x - 6 // every 1st character of cvc tripplet -1 to account for slice indices
+	}
+	digits := func(x int) int {
+		return 6*x - 4 // every 3rd character of cvc tripplet -1 to account for slice indices
+	}
+	upperSlice := getSlice(upper, setsNum)
+	upperSlice = getRandomSlice(upperSlice, countUpper)
+	digitSlice := getSlice(digits, setsNum)
+	digitSlice = getRandomSlice(digitSlice, countDigits)
 
-		randomDigitIndex, err := rand.Int(rand.Reader, big.NewInt(int64(len(DIGITS))))
+	runes := []rune(s)
+
+	// Loop through UPPER indices
+	for _, element := range upperSlice {
+		runes[element] = unicode.ToUpper(runes[element])
+	}
+
+	// Loop through DIGITS indices
+	for _, element := range digitSlice {
+		randomDigitIndex, err := crand.Int(crand.Reader, big.NewInt(int64(len(DIGITS))))
 		if err != nil {
 			return "", err
 		}
 		randomDigit := DIGITS[int(randomDigitIndex.Int64())]
-
-		idx := int(randomIndex.Int64())
-
-		// If the index has not been chosen yet, add it to the map.
-		if !chosenIndices[idx] {
-			chosenIndices[idx] = true
-			runes[idx] = rune(randomDigit)
-		}
+		runes[element] = rune(randomDigit)
 	}
-
 	return string(runes), nil
 }
 
@@ -233,7 +221,7 @@ func getCVC() (cvc string, err error) {
 		}
 
 		// Use crypto/rand for secure random number generation.
-		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(len(charSet))))
+		randomIndex, err := crand.Int(crand.Reader, big.NewInt(int64(len(charSet))))
 		if err != nil {
 			return "", err
 		}
@@ -245,6 +233,19 @@ func getCVC() (cvc string, err error) {
 	}
 	return cvc, nil
 
+}
+
+func compute(op operation, a int) int {
+	return op(a)
+}
+
+func getSlice(f operation, setsNum int) (seq []int) {
+	for i := 1; i <= setsNum; i++ {
+		term := compute(f, i)
+		seq = append(seq, term)
+		seq = append(seq, term+3) //3-letter CVC
+	}
+	return seq
 }
 
 func initLoggers() {
