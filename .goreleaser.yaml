@@ -15,11 +15,18 @@ builds:
       - CGO_ENABLED=0
     goos:
       - linux
-    #      - windows
+      - windows
     #      - darwin
     goarch:
       - amd64
       - arm64
+    goamd64:
+      - v3
+    goarm:
+      - v8
+    ignore:
+      - goos: windows
+        goarch: arm64
     flags:
       - -trimpath
     ldflags:
