@@ -2,6 +2,8 @@
 
 Generates consonant-vowel-consonant patterned password.
 
+**zeqBif-xa4sas-Zadkut-xufbim-ra2tel**
+
 ## Use
 
 ```text
