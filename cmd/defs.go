@@ -14,3 +14,5 @@ type tConfig struct {
 	upperNum  int
 	separator string
 }
+
+type operation func(int) int
