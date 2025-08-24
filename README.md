@@ -1,6 +1,16 @@
 # gencvcpass ![Static](https://img.shields.io/badge/flota-pani-darkcyan?style=for-the-badge&labelColor=lightsalmon)
 
-Generate cvc password
+Generates consonant-vowel-consonant patterned password.
+
+## Use
+
+```text
+Flags:
+  -s, --sets int      number of sets between separators (default 5)
+  -u, --upper int     number of uppercase letters (default 2)
+  -d, --digits int    number of digits (default 2)
+      --sep string    separator character (default "-")
+```
 
 ## Build
 
