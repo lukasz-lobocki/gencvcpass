@@ -183,10 +183,10 @@ func swapUpperAndDigits(s string, setsNum int, countUpper int, countDigits int) 
 	}
 
 	upper := func(x int) int {
-		return 6*x - 6 // every 1st character of cvc tripplet -1 to account for slice indices
+		return 3 * x // every 1st character of cvc tripplet
 	}
 	digits := func(x int) int {
-		return 6*x - 4 // every 3rd character of cvc tripplet -1 to account for slice indices
+		return 3*x + 2 // every 3rd character of cvc tripplet
 	}
 	upperSlice := getSlice(upper, setsNum)
 	upperSlice = getRandomSlice(upperSlice, countUpper)
@@ -265,7 +265,6 @@ func getSlice(f operation, setsNum int) (seq []int) {
 	for i := 1; i <= setsNum; i++ {
 		term := compute(f, i)
 		seq = append(seq, term)
-		seq = append(seq, term+3) //3-letter CVC
 	}
 	return seq
 }
