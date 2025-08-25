@@ -106,7 +106,7 @@ func init() {
 func main() {
 	// Validate input.
 	if config.setsNum < 1 {
-		logError.Fatalf("count of sets=%d must be equal or greater than 1", config.setsNum)
+		logError.Fatalf("sets=%d must be equal or greater than 1", config.setsNum)
 	}
 
 	// Get string of CVCs
@@ -148,10 +148,10 @@ func main() {
 func swapUpperAndDigits(s string, setsNum int, countUpper int, countDigits int) (string, error) {
 	// Validate input
 	if countUpper < 0 || countUpper > setsNum*2 {
-		return "", fmt.Errorf("count of upper=%d must be between 0 and number of sets=%d*2", countUpper, setsNum)
+		return "", fmt.Errorf("upper=%d must be between 0 and the number of sets=%d * 2", countUpper, setsNum)
 	}
 	if countDigits < 0 || countDigits > setsNum*2 {
-		return "", fmt.Errorf("count of digits=%d must be between 0 and number of sets=%d*2", countDigits, setsNum)
+		return "", fmt.Errorf("digits=%d must be between 0 and the number of sets=%d * 2", countDigits, setsNum)
 	}
 
 	upper := func(x int) int {
