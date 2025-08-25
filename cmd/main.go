@@ -2,6 +2,7 @@ package cmd
 
 import (
 	crand "crypto/rand"
+	"encoding/binary"
 	"fmt"
 	"log"
 	"math/big"
@@ -131,8 +132,29 @@ func main() {
 	fmt.Println(password)
 }
 
+// NewCryptoRandSource creates a new crypto-safe random source.
+func NewCryptoRandSource() *cryptoRandSource {
+	return &cryptoRandSource{}
+}
+
+// Seed is a no-op for a cryptographically secure source.
+func (s *cryptoRandSource) Seed(seed int64) {}
+
+// Int63 returns a non-negative pseudo-random 63-bit integer from the crypto/rand source.
+func (s *cryptoRandSource) Int63() int64 {
+	var b [8]byte
+	_, err := crand.Read(b[:])
+	if err != nil {
+		logError.Fatalf("crypto/rand: failed to read random bytes. %v", err)
+	}
+	// Mask off the sign bit to ensure a positive number
+	return int64(binary.LittleEndian.Uint64(b[:]) & (1<<63 - 1))
+}
+
 func getRandomSlice(s []int, n int) (seq []int) {
-	mrand.Shuffle(len(s), func(i, j int) {
+	// Create a new Rand instance using our crypto-safe source.
+	r := mrand.New(NewCryptoRandSource())
+	r.Shuffle(len(s), func(i, j int) {
 		s[i], s[j] = s[j], s[i]
 	})
 	return s[:n]

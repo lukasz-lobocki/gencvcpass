@@ -15,4 +15,8 @@ type tConfig struct {
 	separator string
 }
 
+// operation implements function calculating positions of UPPER and digits
 type operation func(int) int
+
+// cryptoRandSource implements math/rand.Source
+type cryptoRandSource struct{}
