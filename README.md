@@ -1,6 +1,6 @@
 # gencvcpass ![Static](https://img.shields.io/badge/flota-pani-darkcyan?style=for-the-badge&labelColor=lightsalmon)
 
-Generates consonant-vowel-consonant patterned password.
+Generates consonant-vowel-consonant patterned password. Spiced up with uppercase letters and digits.
 
 **zeqBif-xa4sas-Zadkut-xufbim-ra2tel**
 
@@ -14,8 +14,8 @@ Flags:
       --sep string    separator character (default "-")
 ```
 
-- Uppercase letters are generated as first character of a random *cvc* triplets.
-- Digits are generated as last character of a random *cvc* triplets.
+- Uppercase letters are generated as first character of random *cvc* triplets.
+- Digits are generated as last character of random *cvc* triplets.
 
 ## Build
 
