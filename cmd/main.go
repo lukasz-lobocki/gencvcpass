@@ -162,10 +162,10 @@ func swapUpperAndDigits(s string, setsNum int, countUpper int, countDigits int) 
 	}
 	// Get, shuffle and cut the clices
 	upperSlice := getRandomPiece(
-		getSlice(upper, setsNum),
+		getSlice(upper, setsNum*2),
 		countUpper)
 	digitSlice := getRandomPiece(
-		getSlice(digits, setsNum),
+		getSlice(digits, setsNum*2),
 		countDigits)
 
 	runes := []rune(s)
@@ -221,7 +221,7 @@ func (s *cryptoRandSource) Int63() int64 {
 
 // getSlice returns a sequential slice of iterated function results
 func getSlice(function operation, iterations int) (seq []int) {
-	for i := 1; i <= iterations; i++ {
+	for i := 0; i <= iterations-1; i++ {
 		term := compute(function, i)
 		seq = append(seq, term)
 	}
