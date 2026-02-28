@@ -93,6 +93,7 @@ func init() {
 	rootCmd.Flags().IntVarP(&config.upperNum, "upper", "u", 2, "number of uppercase letters")
 	rootCmd.Flags().IntVarP(&config.digitsNum, "digits", "d", 2, "number of digits")
 	rootCmd.Flags().StringVar(&config.separator, "sep", "-", "separator character")
+	rootCmd.Flags().BoolVarP(&config.lessNonPolish, "less-non-polish", "l", false, "do not use non-polish consonants")
 
 	// Hide help command.
 	rootCmd.SetHelpCommand(&cobra.Command{Hidden: true})
@@ -270,7 +271,11 @@ func getCVC() (cvc string, err error) {
 		var charSet string
 		useConsonant = !useConsonant // Alternate between consonant and vowel
 		if useConsonant {
-			charSet = CONSONANTS
+			if config.lessNonPolish {
+				charSet = CONSONANTS_PL
+			} else {
+				charSet = CONSONANTS
+			}
 		} else {
 			charSet = VOWELS
 		}
