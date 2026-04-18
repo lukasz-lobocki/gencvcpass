@@ -89,7 +89,7 @@ func init() {
 	rootCmd.PersistentFlags().IntVar(&loggingLevel, "logging", 0, // Adding global ie. persistent logging level flag.
 		fmt.Sprintf("logging level [0...%d] (default 0)", MAX_LOGGING_LEVEL))
 
-	rootCmd.Flags().IntVarP(&config.setsNum, "sets", "s", 5, "number of sets between separators")
+	rootCmd.Flags().IntVarP(&config.setsNum, "sets", "s", 4, "number of sets between separators")
 	rootCmd.Flags().IntVarP(&config.upperNum, "upper", "u", 2, "number of uppercase letters")
 	rootCmd.Flags().IntVarP(&config.digitsNum, "digits", "d", 2, "number of digits")
 	rootCmd.Flags().StringVar(&config.separator, "sep", "-", "separator character")
