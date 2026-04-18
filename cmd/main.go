@@ -277,7 +277,11 @@ func getCVC() (cvc string, err error) {
 				charSet = CONSONANTS
 			}
 		} else {
-			charSet = VOWELS
+			if config.lessNonPolish {
+				charSet = VOWELS_PL
+			} else {
+				charSet = VOWELS
+			}
 		}
 
 		// Use crypto/rand for secure random number generation.

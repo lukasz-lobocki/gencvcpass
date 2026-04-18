@@ -5,6 +5,7 @@ const (
 	CONSONANTS            = "bcdfghjklmnpqrstvwxyz"
 	CONSONANTS_PL         = "bcdfghjklmnprstwz"
 	VOWELS                = "aeiou"
+	VOWELS_PL             = "aeiouy"
 	DIGITS                = "023456789"
 	CHUNKSIZE             = 6
 )
