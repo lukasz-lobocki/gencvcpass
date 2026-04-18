@@ -128,17 +128,17 @@ func main() {
 		logInfo.Printf("passString= %s", passString)
 	}
 
-	// Split it to chunks
-	chunks, err := splitIntoChunks(passString, CHUNKSIZE)
+	// Split it to modules
+	modules, err := splitIntoModules(passString, CHUNKSIZE*2) // CHUNKSIZE * 2 for CVCCVC multilet
 	if err != nil {
 		logError.Fatalln(err)
 	}
 	if loggingLevel >= 2 {
-		logInfo.Printf("chunks= %v", chunks)
+		logInfo.Printf("chunks= %v", modules)
 	}
 
 	// Merge chunks with separator
-	password := strings.Join(chunks, config.separator)
+	password := strings.Join(modules, config.separator)
 
 	// Output the result
 	fmt.Println(password)
@@ -156,10 +156,10 @@ func swapUpperAndDigits(s string, setsNum int, countUpper int, countDigits int) 
 	}
 
 	upper := func(x int) int {
-		return 3 * x // every 1st character of CVC tripplet -1
+		return CHUNKSIZE * x // every 1st character of CVC... multilet
 	}
 	digits := func(x int) int {
-		return 3*x + 2 // every 3rd character of CVC tripplet -1
+		return CHUNKSIZE*x + (CHUNKSIZE - 1) // every 3rd character of CVC multilet -1
 	}
 	// Get, shuffle and cut the clices
 	upperSlice := getRandomPiece(
@@ -234,8 +234,8 @@ func compute(op operation, a int) int {
 	return op(a)
 }
 
-// splitIntoChunks divides a string into chunks of a given size.
-func splitIntoChunks(s string, chunkSize int) (chunks []string, err error) {
+// splitIntoModules divides a string into chunks of a given size.
+func splitIntoModules(s string, chunkSize int) (chunks []string, err error) {
 	// Validate input
 	if chunkSize <= 0 {
 		return chunks, fmt.Errorf("size of a chunk must be greater than 0")
@@ -267,7 +267,7 @@ func getCVC() (cvc string, err error) {
 		useConsonant bool // true for consonant, false for vowel
 	)
 
-	for i := 1; i <= 3; i++ { // 3-letter CVC
+	for i := 1; i <= CHUNKSIZE; i++ { // CHUNKSIZE-letter CVC
 		var charSet string
 		useConsonant = !useConsonant // Alternate between consonant and vowel
 		if useConsonant {

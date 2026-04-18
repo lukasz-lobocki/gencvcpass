@@ -27,7 +27,7 @@ func Test_splitIntoChunks(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotChunks, err := splitIntoChunks(tt.args.s, tt.args.chunkSize)
+			gotChunks, err := splitIntoModules(tt.args.s, tt.args.chunkSize)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("splitIntoChunks() error = %v, wantErr %v", err, tt.wantErr)
 				return
