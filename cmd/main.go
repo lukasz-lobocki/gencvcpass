@@ -128,17 +128,17 @@ func main() {
 		logInfo.Printf("passString= %s", passString)
 	}
 
-	// Split it to modules
-	modules, err := splitIntoModules(passString, CHUNKSIZE*2) // CHUNKSIZE * 2 for CVCCVC multilet
+	// Split it to sets
+	sets, err := splitIntoSets(passString, CHUNKSIZE*CHUNKSPERSET) // CHUNKSIZE * CHUNKSPERSET for CVCV...CVCV... multilet
 	if err != nil {
 		logError.Fatalln(err)
 	}
 	if loggingLevel >= 2 {
-		logInfo.Printf("chunks= %v", modules)
+		logInfo.Printf("sets= %v", sets)
 	}
 
-	// Merge chunks with separator
-	password := strings.Join(modules, config.separator)
+	// Merge sets with separator
+	password := strings.Join(sets, config.separator)
 
 	// Output the result
 	fmt.Println(password)
@@ -234,23 +234,23 @@ func compute(op operation, a int) int {
 	return op(a)
 }
 
-// splitIntoModules divides a string into chunks of a given size.
-func splitIntoModules(s string, chunkSize int) (chunks []string, err error) {
+// splitIntoSets divides a string into sets of a given size.
+func splitIntoSets(s string, setSize int) (sets []string, err error) {
 	// Validate input
-	if chunkSize <= 0 {
-		return chunks, fmt.Errorf("size of a chunk must be greater than 0")
+	if setSize <= 0 {
+		return sets, fmt.Errorf("size of a set must be greater than 0")
 	}
 
-	for i := 0; i < len(s); i += chunkSize {
-		end := min(i+chunkSize, len(s)) // len, in case the remainder is shorter than chunkSize
-		chunks = append(chunks, s[i:end])
+	for i := 0; i < len(s); i += setSize {
+		end := min(i+setSize, len(s)) // len, in case the remainder is shorter than setSize
+		sets = append(sets, s[i:end])
 	}
-	return chunks, nil
+	return sets, nil
 }
 
 // getCVCCVCsString returns CVCCVCs repeated
 func getCVCCVCsString(repetitions int) (cvcsString string, err error) {
-	for i := 1; i <= (repetitions * 2); i++ { // times 2 for each chunk to be CVCCVC
+	for i := 1; i <= (repetitions * CHUNKSPERSET); i++ { // times CHUNKSPERSET for each string to be CHUNKSPERSET*CHUNKSIZE
 		cvc, err := getCVC()
 		if err != nil {
 			return "", err
@@ -260,14 +260,14 @@ func getCVCCVCsString(repetitions int) (cvcsString string, err error) {
 	return cvcsString, nil
 }
 
-// getCVC returns random consonant-vowel-consonant string
+// getCVCV... returns random consonant-vowel-consonant-... string
 func getCVC() (cvc string, err error) {
 
 	var (
 		useConsonant bool // true for consonant, false for vowel
 	)
 
-	for i := 1; i <= CHUNKSIZE; i++ { // CHUNKSIZE-letter CVC
+	for i := 1; i <= CHUNKSIZE; i++ { // CHUNKSIZE-letter CVCV... multilet
 		var charSet string
 		useConsonant = !useConsonant // Alternate between consonant and vowel
 		if useConsonant {
