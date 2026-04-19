@@ -89,7 +89,7 @@ func init() {
 	rootCmd.PersistentFlags().IntVar(&loggingLevel, "logging", 0, // Adding global ie. persistent logging level flag.
 		fmt.Sprintf("logging level [0...%d] (default 0)", MAX_LOGGING_LEVEL))
 
-	rootCmd.Flags().IntVarP(&config.setsNum, "sets", "s", 5, "number of sets between separators")
+	rootCmd.Flags().IntVarP(&config.setsNum, "sets", "s", 4, "number of sets between separators")
 	rootCmd.Flags().IntVarP(&config.upperNum, "upper", "u", 2, "number of uppercase letters")
 	rootCmd.Flags().IntVarP(&config.digitsNum, "digits", "d", 2, "number of digits")
 	rootCmd.Flags().StringVar(&config.separator, "sep", "-", "separator character")
@@ -128,17 +128,17 @@ func main() {
 		logInfo.Printf("passString= %s", passString)
 	}
 
-	// Split it to chunks
-	chunks, err := splitIntoChunks(passString, CHUNKSIZE)
+	// Split it to sets
+	sets, err := splitIntoSets(passString, CHUNKSIZE*CHUNKSPERSET) // CHUNKSIZE * CHUNKSPERSET for CVCV...CVCV... multilet
 	if err != nil {
 		logError.Fatalln(err)
 	}
 	if loggingLevel >= 2 {
-		logInfo.Printf("chunks= %v", chunks)
+		logInfo.Printf("sets= %v", sets)
 	}
 
-	// Merge chunks with separator
-	password := strings.Join(chunks, config.separator)
+	// Merge sets with separator
+	password := strings.Join(sets, config.separator)
 
 	// Output the result
 	fmt.Println(password)
@@ -156,10 +156,10 @@ func swapUpperAndDigits(s string, setsNum int, countUpper int, countDigits int) 
 	}
 
 	upper := func(x int) int {
-		return 3 * x // every 1st character of CVC tripplet -1
+		return CHUNKSIZE * x // every 1st character of CVC... multilet
 	}
 	digits := func(x int) int {
-		return 3*x + 2 // every 3rd character of CVC tripplet -1
+		return CHUNKSIZE*x + (CHUNKSIZE - 1) // every 3rd character of CVC multilet -1
 	}
 	// Get, shuffle and cut the clices
 	upperSlice := getRandomPiece(
@@ -234,23 +234,23 @@ func compute(op operation, a int) int {
 	return op(a)
 }
 
-// splitIntoChunks divides a string into chunks of a given size.
-func splitIntoChunks(s string, chunkSize int) (chunks []string, err error) {
+// splitIntoSets divides a string into sets of a given size.
+func splitIntoSets(s string, setSize int) (sets []string, err error) {
 	// Validate input
-	if chunkSize <= 0 {
-		return chunks, fmt.Errorf("size of a chunk must be greater than 0")
+	if setSize <= 0 {
+		return sets, fmt.Errorf("size of a set must be greater than 0")
 	}
 
-	for i := 0; i < len(s); i += chunkSize {
-		end := min(i+chunkSize, len(s)) // len, in case the remainder is shorter than chunkSize
-		chunks = append(chunks, s[i:end])
+	for i := 0; i < len(s); i += setSize {
+		end := min(i+setSize, len(s)) // len, in case the remainder is shorter than setSize
+		sets = append(sets, s[i:end])
 	}
-	return chunks, nil
+	return sets, nil
 }
 
 // getCVCCVCsString returns CVCCVCs repeated
 func getCVCCVCsString(repetitions int) (cvcsString string, err error) {
-	for i := 1; i <= (repetitions * 2); i++ { // times 2 for each chunk to be CVCCVC
+	for i := 1; i <= (repetitions * CHUNKSPERSET); i++ { // times CHUNKSPERSET for each string to be CHUNKSPERSET*CHUNKSIZE
 		cvc, err := getCVC()
 		if err != nil {
 			return "", err
@@ -260,14 +260,14 @@ func getCVCCVCsString(repetitions int) (cvcsString string, err error) {
 	return cvcsString, nil
 }
 
-// getCVC returns random consonant-vowel-consonant string
+// getCVCV... returns random consonant-vowel-consonant-... string
 func getCVC() (cvc string, err error) {
 
 	var (
 		useConsonant bool // true for consonant, false for vowel
 	)
 
-	for i := 1; i <= 3; i++ { // 3-letter CVC
+	for i := 1; i <= CHUNKSIZE; i++ { // CHUNKSIZE-letter CVCV... multilet
 		var charSet string
 		useConsonant = !useConsonant // Alternate between consonant and vowel
 		if useConsonant {

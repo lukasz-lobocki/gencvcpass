@@ -7,7 +7,8 @@ const (
 	VOWELS                = "aeiou"
 	VOWELS_PL             = "aeiouy"
 	DIGITS                = "023456789"
-	CHUNKSIZE             = 6
+	CHUNKSIZE             = 4
+	CHUNKSPERSET          = 2
 )
 
 type tConfig struct {

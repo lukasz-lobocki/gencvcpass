@@ -27,7 +27,7 @@ func Test_splitIntoChunks(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotChunks, err := splitIntoChunks(tt.args.s, tt.args.chunkSize)
+			gotChunks, err := splitIntoSets(tt.args.s, tt.args.chunkSize)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("splitIntoChunks() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -71,8 +71,8 @@ func Test_getCVC(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if len(result) != 3 {
-			t.Errorf("Lenght of the result is not 3")
+		if len(result) != CHUNKSIZE {
+			t.Errorf("Lenght of the result is not %d", CHUNKSIZE)
 		}
 	}
 }
@@ -84,8 +84,8 @@ func Test_getCVCCVCsString(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if len(result) != i*3*2 {
-			t.Errorf("Lenght of the result is not %d", i*3*2)
+		if len(result) != i*CHUNKSIZE*CHUNKSPERSET {
+			t.Errorf("Lenght of the result is not %d", i*CHUNKSIZE*CHUNKSPERSET)
 		}
 	}
 }
