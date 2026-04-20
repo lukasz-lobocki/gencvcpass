@@ -11,7 +11,7 @@ const (
 	CHUNKSPERSET          = 2
 )
 
-type tConfig struct {
+type config struct {
 	setsNum       int
 	digitsNum     int
 	upperNum      int

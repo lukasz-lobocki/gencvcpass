@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
-func Test_splitIntoChunks(t *testing.T) {
+func TestSplitIntoSets(t *testing.T) {
 	type args struct {
 		s         string
 		chunkSize int
@@ -29,17 +30,17 @@ func Test_splitIntoChunks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			gotChunks, err := splitIntoSets(tt.args.s, tt.args.chunkSize)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("splitIntoChunks() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("splitIntoSets() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(gotChunks, tt.wantChunks) {
-				t.Errorf("splitIntoChunks() = %v, want %v", gotChunks, tt.wantChunks)
+				t.Errorf("splitIntoSets() = %v, want %v", gotChunks, tt.wantChunks)
 			}
 		})
 	}
 }
 
-func Test_getSlice(t *testing.T) {
+func TestGetSlice(t *testing.T) {
 	type args struct {
 		function   operation
 		iterations int
@@ -64,28 +65,76 @@ func Test_getSlice(t *testing.T) {
 	}
 }
 
-func Test_getCVC(t *testing.T) {
+func TestGetCVC(t *testing.T) {
 	const numRuns = 100
 	for i := 0; i < numRuns; i++ {
-		result, err := getCVC()
+		result, err := getCVC(config{})
 		if err != nil {
 			t.Error(err)
 		}
 		if len(result) != CHUNKSIZE {
-			t.Errorf("Lenght of the result is not %d", CHUNKSIZE)
+			t.Errorf("length of the result is not %d", CHUNKSIZE)
 		}
 	}
 }
 
-func Test_getCVCCVCsString(t *testing.T) {
+func TestGetCVCCVCsString(t *testing.T) {
 	const numRuns = 10
 	for i := range numRuns {
-		result, err := getCVCCVCsString(i)
+		result, err := getCVCCVCsString(config{setsNum: i})
 		if err != nil {
 			t.Error(err)
 		}
 		if len(result) != i*CHUNKSIZE*CHUNKSPERSET {
-			t.Errorf("Lenght of the result is not %d", i*CHUNKSIZE*CHUNKSPERSET)
+			t.Errorf("length of the result is not %d", i*CHUNKSIZE*CHUNKSPERSET)
+		}
+	}
+}
+
+func TestConfigValidate(t *testing.T) {
+	tests := []struct {
+		name    string
+		cfg     config
+		wantErr bool
+	}{
+		{"valid", config{setsNum: 4, upperNum: 2, digitsNum: 2}, false},
+		{"sets too small", config{setsNum: 0}, true},
+		{"upper too large", config{setsNum: 1, upperNum: 3}, true},
+		{"digits too large", config{setsNum: 1, digitsNum: 3}, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.cfg.validate()
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestGeneratePassword(t *testing.T) {
+	cfg := config{
+		setsNum:       3,
+		upperNum:      2,
+		digitsNum:     2,
+		separator:     "-",
+		lessNonPolish: true,
+	}
+
+	password, err := GeneratePassword(cfg)
+	if err != nil {
+		t.Fatalf("GeneratePassword() error = %v", err)
+	}
+
+	parts := strings.Split(password, cfg.separator)
+	if len(parts) != cfg.setsNum {
+		t.Fatalf("GeneratePassword() produced %d parts, want %d", len(parts), cfg.setsNum)
+	}
+
+	for _, part := range parts {
+		if len(part) != CHUNKSIZE*CHUNKSPERSET {
+			t.Fatalf("set length = %d, want %d", len(part), CHUNKSIZE*CHUNKSPERSET)
 		}
 	}
 }
