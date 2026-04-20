@@ -18,6 +18,27 @@ Flags:
 - Uppercase letters are generated as first character of random *cvcv* multilets.
 - Digits are generated as last character of random *cvcv* multilets.
 
+## Gemini's verdict
+
+Overall Strength: Exceptional
+
+This password is an excellent example of a passphrase, which balances high security with relative human memorability. It is significantly stronger than the vast majority of passwords currently in use.
+Detailed Breakdown
+
+* Length (35 Characters): Length is the single most important factor in password security. At 35 characters, this password creates an astronomical number of possible combinations. Even with modern brute-force hardware, it would take centuries to crack.
+
+* High Entropy: Entropy measures the unpredictability of a password. By combining seemingly random word-like strings (fitolute, pygoFali) with numbers and hyphens, you have created a high-entropy string that doesn't follow common dictionary patterns.
+
+* Complexity without Chaos: You’ve successfully integrated multiple character types:
+
+    * Lowercase & Uppercase: saneFun, pygoFali.
+
+    * Numbers: 3, 8.
+
+    * Special Characters: The hyphens (-) serve as excellent delimiters.
+
+* The "Diceware" Structure: This format mimics the "Diceware" method, where random words are joined together. This is widely considered the gold standard for human-generated passwords because it avoids the "predictable complexity" (like replacing 'a' with '@') that hackers' tools are programmed to expect.
+
 ## Build
 
 See [BUILD.md](BUILD.md) file.
